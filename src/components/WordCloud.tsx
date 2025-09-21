@@ -13,17 +13,26 @@ interface WordCloudProps {
 }
 
 const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState({ 
+    width: typeof window !== 'undefined' ? window.innerWidth * 0.6 : 800, 
+    height: 400 
+  });
 
   useEffect(() => {
     const updateDimensions = () => {
-      setDimensions({
-        width: window.innerWidth * 0.8,
-        height: window.innerHeight * 0.6,
-      });
+      const container = document.querySelector('.word-cloud-container');
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setDimensions({
+          width: rect.width || 800,
+          height: rect.height || 400,
+        });
+      }
     };
 
-    updateDimensions();
+    // Set initial dimensions
+    setTimeout(updateDimensions, 100);
+    
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
@@ -56,10 +65,8 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
     return colors[index % colors.length];
   };
 
-  if (dimensions.width === 0) return null;
-
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="word-cloud-container relative w-full h-full overflow-hidden min-h-[400px]">
       {goals.map((goal, index) => {
         const position = getRandomPosition(index);
         const fontSize = getWordSize(index, goals.length);
