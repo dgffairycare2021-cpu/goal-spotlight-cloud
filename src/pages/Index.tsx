@@ -103,13 +103,18 @@ const Index = () => {
 
   const handleDeleteGoal = async (goalId: string) => {
     try {
-      // Set the session header for RLS policy
-      const { error } = await supabase.rpc('delete_business_goal', {
-        goal_id: goalId,
-        user_session_id: sessionId
-      });
+      // Use the database function to delete the goal
+      const { data, error } = await supabase
+        .rpc('delete_business_goal', {
+          goal_id: goalId,
+          user_session_id: sessionId
+        });
 
       if (error) throw error;
+
+      if (!data) {
+        throw new Error('ไม่สามารถลบเป้าหมายได้ - อาจไม่ใช่เจ้าของ');
+      }
 
       toast({
         title: "ลบแล้ว",
