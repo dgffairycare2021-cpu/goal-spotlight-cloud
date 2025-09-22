@@ -103,11 +103,11 @@ const Index = () => {
 
   const handleDeleteGoal = async (goalId: string) => {
     try {
-      const { error } = await supabase
-        .from('business_goals')
-        .delete()
-        .eq('id', goalId)
-        .eq('session_id', sessionId);
+      // Set the session header for RLS policy
+      const { error } = await supabase.rpc('delete_business_goal', {
+        goal_id: goalId,
+        user_session_id: sessionId
+      });
 
       if (error) throw error;
 
@@ -150,7 +150,7 @@ const Index = () => {
           <div className="lg:col-span-2">
             <div className="bg-background/10 backdrop-blur-sm rounded-2xl p-6 shadow-card min-h-[500px]">
               <h2 className="text-2xl font-bold text-background mb-6 text-center">
-                Word Cloud เป้าหมายธุรกิจ
+                เป้าหมายระบายฝัน
               </h2>
               {goals.length > 0 ? (
                 <WordCloud goals={goals} onGoalClick={handleGoalClick} />

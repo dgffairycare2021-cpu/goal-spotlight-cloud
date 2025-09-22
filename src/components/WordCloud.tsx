@@ -37,19 +37,26 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const getRandomPosition = (index: number) => {
-    const cols = Math.floor(dimensions.width / 150);
-    const rows = Math.floor(dimensions.height / 80);
+  const getPosition = (index: number) => {
+    const containerWidth = dimensions.width;
+    const containerHeight = dimensions.height;
     
-    const col = index % cols;
-    const row = Math.floor(index / cols) % rows;
+    // Create a more natural word cloud layout
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
     
-    const x = (col + 0.5) * (dimensions.width / cols) + (Math.random() - 0.5) * 50;
-    const y = (row + 0.5) * (dimensions.height / rows) + (Math.random() - 0.5) * 30;
+    // Spiral pattern for better distribution
+    const angle = index * 0.8; // Spiral angle
+    const radius = Math.min(30 + index * 8, Math.min(containerWidth, containerHeight) * 0.35);
     
+    const x = centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
+    const y = centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+    
+    // Ensure words stay within bounds with padding
+    const padding = 80;
     return {
-      x: Math.max(75, Math.min(x, dimensions.width - 75)),
-      y: Math.max(40, Math.min(y, dimensions.height - 40)),
+      x: Math.max(padding, Math.min(x, containerWidth - padding)),
+      y: Math.max(padding, Math.min(y, containerHeight - padding)),
     };
   };
 
@@ -68,7 +75,7 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
   return (
     <div className="word-cloud-container relative w-full h-full overflow-hidden min-h-[400px]">
       {goals.map((goal, index) => {
-        const position = getRandomPosition(index);
+        const position = getPosition(index);
         const fontSize = getWordSize(index, goals.length);
         const colorClass = getWordColor(index);
 
