@@ -43,7 +43,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_business_goal: {
+        Args: { goal_id: string; user_session_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
