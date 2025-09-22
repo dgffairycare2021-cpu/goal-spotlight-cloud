@@ -144,10 +144,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-background mb-4">
-            กระดานประกาศเป้าหมายธุรกิจ
+            เป้าหมายระบายฝัน
           </h1>
           <p className="text-lg md:text-xl text-background/80 max-w-2xl mx-auto">
-            แชร์และค้นหาแรงบันดาลใจจากเป้าหมายทางธุรกิจของสมาชิกเครือข่าย
+            บันทึกและติดตามเป้าหมายส่วนตัวของคุณอย่างปลอดภัย
           </p>
         </header>
 
@@ -162,7 +162,7 @@ const Index = () => {
               ) : (
                 <div className="flex items-center justify-center h-96">
                   <p className="text-background/60 text-lg">
-                    ยังไม่มีเป้าหมายที่ประกาศ เริ่มต้นด้วยการเพิ่มเป้าหมายแรกของคุณ!
+                    เริ่มต้นบันทึกเป้าหมายส่วนตัวของคุณ! ข้อมูลทั้งหมดจะเก็บไว้อย่างปลอดภัย
                   </p>
                 </div>
               )}
@@ -177,10 +177,6 @@ const Index = () => {
                 สถิติ
               </h3>
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-background/80">เป้าหมายทั้งหมด</span>
-                  <span className="text-background font-bold text-xl">{goals.length}</span>
-                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-background/80">เป้าหมายของคุณ</span>
                   <span className="text-background font-bold text-xl">
