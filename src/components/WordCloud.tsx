@@ -38,29 +38,43 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Calculate positions to avoid overlaps
+  // Calculate positions to avoid overlaps using spiral positioning
   useEffect(() => {
     if (goals.length === 0) return;
     
     const newPositions: Array<{x: number, y: number, width: number, height: number}> = [];
-    const padding = 10;
+    const padding = 15; // Increased padding for better spacing
     
     goals.forEach((_, index) => {
       const fontSize = getWordSize(index, goals.length);
       const textLength = goals[index].goal_text.length;
-      const estimatedWidth = textLength * fontSize * 0.6;
-      const estimatedHeight = fontSize * 1.2;
+      // More accurate width calculation for Thai text
+      const estimatedWidth = Math.max(textLength * fontSize * 0.7, fontSize * 3);
+      const estimatedHeight = fontSize * 1.4; // Increased height for better spacing
       
-      let attempts = 0;
       let position;
+      let attempts = 0;
+      const maxAttempts = 100;
       
+      // Try spiral positioning from center outward
       do {
-        position = getRandomPosition(index, estimatedWidth, estimatedHeight);
+        if (attempts < 20) {
+          // First, try near center with spiral
+          position = getSpiralPosition(attempts, estimatedWidth, estimatedHeight);
+        } else {
+          // Then try random positions with zone distribution
+          position = getRandomPosition(index, estimatedWidth, estimatedHeight);
+        }
         attempts++;
       } while (
-        attempts < 50 && 
+        attempts < maxAttempts && 
         hasOverlap(position, newPositions, padding)
       );
+      
+      // If still overlapping after max attempts, place in a safe fallback position
+      if (hasOverlap(position, newPositions, padding)) {
+        position = getFallbackPosition(index, estimatedWidth, estimatedHeight, newPositions, padding);
+      }
       
       newPositions.push({
         ...position,
@@ -71,6 +85,42 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
     
     setPositions(newPositions);
   }, [goals, dimensions]);
+
+  const getSpiralPosition = (attempt: number, width: number, height: number) => {
+    const centerX = dimensions.width / 2;
+    const centerY = dimensions.height / 2;
+    const angle = attempt * 0.5; // Spiral angle increment
+    const radius = attempt * 10; // Spiral radius increment
+    
+    const x = Math.max(20, Math.min(dimensions.width - width - 20, centerX + Math.cos(angle) * radius - width / 2));
+    const y = Math.max(20, Math.min(dimensions.height - height - 20, centerY + Math.sin(angle) * radius - height / 2));
+    
+    return { x, y };
+  };
+
+  const getFallbackPosition = (
+    index: number, 
+    width: number, 
+    height: number, 
+    existingPositions: Array<{x: number, y: number, width: number, height: number}>,
+    padding: number
+  ) => {
+    // Grid-based fallback positioning
+    const cols = Math.floor(dimensions.width / (width + padding + 20));
+    const rows = Math.floor(dimensions.height / (height + padding + 20));
+    
+    const row = Math.floor(index / cols);
+    const col = index % cols;
+    
+    const x = Math.max(20, col * (width + padding + 20) + 20);
+    const y = Math.max(20, row * (height + padding + 20) + 20);
+    
+    // Ensure within bounds
+    return {
+      x: Math.min(x, dimensions.width - width - 20),
+      y: Math.min(y, dimensions.height - height - 20)
+    };
+  };
 
   const getRandomPosition = (index: number, width: number, height: number) => {
     const containerWidth = dimensions.width;
@@ -91,8 +141,10 @@ const WordCloud = ({ goals, onGoalClick }: WordCloudProps) => {
     ];
     
     const zone = zones[index % zones.length];
-    const x = zone.x + Math.random() * (zone.w - width - margin);
-    const y = zone.y + Math.random() * (zone.h - height - margin);
+    const maxX = Math.max(margin, zone.w - width - margin);
+    const maxY = Math.max(margin, zone.h - height - margin);
+    const x = zone.x + Math.random() * maxX;
+    const y = zone.y + Math.random() * maxY;
     
     return { x, y };
   };
